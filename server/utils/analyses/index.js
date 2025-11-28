@@ -17,6 +17,17 @@ import { analyzeDomDepth } from './domDepth.js';
 import { analyzeAriaRoles } from './ariaRoles.js';
 import { analyzeMinFontSize } from './minFontSize.js';
 
+// Structure analyses
+import { 
+  analyzeCoreLandmarks,
+  analyzeH1Count,
+  analyzeHeadingHierarchy,
+  analyzeSemanticTags,
+  analyzeDivSoup,
+  analyzeMeaningfulGrouping,
+  analyzeEmptyHeadings
+} from './structure/index.js';
+
 // Export individual analyses
 export { analyzeAltTextCoverage } from './altTextCoverage.js';
 export { analyzeDescriptiveAnchorText } from './descriptiveAnchorText.js';
@@ -25,6 +36,17 @@ export { analyzeViewportTag } from './viewportTag.js';
 export { analyzeDomDepth } from './domDepth.js';
 export { analyzeAriaRoles } from './ariaRoles.js';
 export { analyzeMinFontSize } from './minFontSize.js';
+
+// Export structure analyses
+export { 
+  analyzeCoreLandmarks,
+  analyzeH1Count,
+  analyzeHeadingHierarchy,
+  analyzeSemanticTags,
+  analyzeDivSoup,
+  analyzeMeaningfulGrouping,
+  analyzeEmptyHeadings
+};
 
 /**
  * Runs all accessibility and readability analyses
@@ -39,7 +61,16 @@ export function runAllAnalyses(html) {
     viewportTag: analyzeViewportTag(html),
     domDepth: analyzeDomDepth(html),
     ariaRoles: analyzeAriaRoles(html),
-    minFontSize: analyzeMinFontSize(html)
+    minFontSize: analyzeMinFontSize(html),
+    
+    // Structure & Semantic Quality
+    coreLandmarks: analyzeCoreLandmarks(html),
+    h1Count: analyzeH1Count(html),
+    headingHierarchy: analyzeHeadingHierarchy(html),
+    semanticTags: analyzeSemanticTags(html),
+    divSoup: analyzeDivSoup(html),
+    meaningfulGrouping: analyzeMeaningfulGrouping(html),
+    emptyHeadings: analyzeEmptyHeadings(html)
   };
 }
 

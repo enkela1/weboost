@@ -11,8 +11,9 @@ function App() {
   const [error, setError] = useState(null)
   const [expandedSections, setExpandedSections] = useState(new Set())
   const [isAnalysisExpanded, setIsAnalysisExpanded] = useState(false)
+  const [isStructureExpanded, setIsStructureExpanded] = useState(false)
 
-  // Calculate total score
+  // Calculate total score for Accessibility & Readability
   const calculateTotalScore = () => {
     if (!analysis) return { total: 0, max: 0 }
     
@@ -46,6 +47,45 @@ function App() {
     if (analysis.minFontSize) {
       total += analysis.minFontSize.score || 0
       max += analysis.minFontSize.maxScore || 0
+    }
+    
+    return { total, max }
+  }
+
+  // Calculate total score for Page Structure & Semantic Quality
+  const calculateStructureScore = () => {
+    if (!analysis) return { total: 0, max: 0 }
+    
+    let total = 0
+    let max = 0
+    
+    if (analysis.coreLandmarks) {
+      total += analysis.coreLandmarks.score || 0
+      max += analysis.coreLandmarks.maxScore || 0
+    }
+    if (analysis.h1Count) {
+      total += analysis.h1Count.score || 0
+      max += analysis.h1Count.maxScore || 0
+    }
+    if (analysis.headingHierarchy) {
+      total += analysis.headingHierarchy.score || 0
+      max += analysis.headingHierarchy.maxScore || 0
+    }
+    if (analysis.semanticTags) {
+      total += analysis.semanticTags.score || 0
+      max += analysis.semanticTags.maxScore || 0
+    }
+    if (analysis.divSoup) {
+      total += analysis.divSoup.score || 0
+      max += analysis.divSoup.maxScore || 0
+    }
+    if (analysis.meaningfulGrouping) {
+      total += analysis.meaningfulGrouping.score || 0
+      max += analysis.meaningfulGrouping.maxScore || 0
+    }
+    if (analysis.emptyHeadings) {
+      total += analysis.emptyHeadings.score || 0
+      max += analysis.emptyHeadings.maxScore || 0
     }
     
     return { total, max }
@@ -124,7 +164,9 @@ function App() {
 
         {analysis && (() => {
           const { total, max } = calculateTotalScore()
+          const structureScore = calculateStructureScore()
           return (
+            <>
             <div className="analysis-section">
               <div 
                 className="analysis-section-header clickable"
@@ -518,6 +560,200 @@ function App() {
               </>
             )}
             </div>
+
+            <div className="analysis-section" style={{ marginTop: '20px' }}>
+              <div 
+                className="analysis-section-header clickable"
+                onClick={() => setIsStructureExpanded(!isStructureExpanded)}
+              >
+                <div className="analysis-section-header-left">
+                  <span className="expand-icon">
+                    {isStructureExpanded ? '▼' : '▶'}
+                  </span>
+                  <div className="analysis-section-header-content">
+                    <div className="analysis-section-title-row">
+                      <h2>Page Structure & Semantic Quality</h2>
+                      <div className="total-score">
+                        <span className="total-score-label">Score:</span>
+                        <span className="total-score-value">{structureScore.total} / {structureScore.max}</span>
+                      </div>
+                    </div>
+                    <p className="analysis-description">
+                      Evaluates the semantic structure of the page, including landmarks, heading hierarchy, and use of semantic HTML tags.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {isStructureExpanded && (
+                <>
+                  {/* 1. Header / Main / Footer */}
+                  {analysis.coreLandmarks && (
+                    <div className="analysis-item">
+                      <div className="analysis-header clickable" onClick={() => toggleSection('coreLandmarks')}>
+                        <div className="analysis-header-left">
+                          <span className="expand-icon">{expandedSections.has('coreLandmarks') ? '▼' : '▶'}</span>
+                          <h3>1. Core Landmarks</h3>
+                        </div>
+                        <span className="score-badge">{analysis.coreLandmarks.score} / {analysis.coreLandmarks.maxScore} pts</span>
+                      </div>
+                      {expandedSections.has('coreLandmarks') && (
+                        <div className="analysis-details">
+                          <p className="criterion-description">Checks for the presence of header, main, and footer landmarks.</p>
+                          <div className="detail-row">
+                            <span className="detail-label">Details:</span>
+                            <span className="detail-value">{analysis.coreLandmarks.details.join(', ') || 'None found'}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 2. Exactly one h1 */}
+                  {analysis.h1Count && (
+                    <div className="analysis-item">
+                      <div className="analysis-header clickable" onClick={() => toggleSection('h1Count')}>
+                        <div className="analysis-header-left">
+                          <span className="expand-icon">{expandedSections.has('h1Count') ? '▼' : '▶'}</span>
+                          <h3>2. H1 Heading Count</h3>
+                        </div>
+                        <span className="score-badge">{analysis.h1Count.score} / {analysis.h1Count.maxScore} pts</span>
+                      </div>
+                      {expandedSections.has('h1Count') && (
+                        <div className="analysis-details">
+                          <p className="criterion-description">Ensures there is exactly one h1 tag on the page.</p>
+                          <div className="detail-row">
+                            <span className="detail-label">Count:</span>
+                            <span className={`detail-value ${analysis.h1Count.count === 1 ? 'status-success' : 'status-error'}`}>{analysis.h1Count.count}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 3. Hierarchical heading use */}
+                  {analysis.headingHierarchy && (
+                    <div className="analysis-item">
+                      <div className="analysis-header clickable" onClick={() => toggleSection('headingHierarchy')}>
+                        <div className="analysis-header-left">
+                          <span className="expand-icon">{expandedSections.has('headingHierarchy') ? '▼' : '▶'}</span>
+                          <h3>3. Heading Hierarchy</h3>
+                        </div>
+                        <span className="score-badge">{analysis.headingHierarchy.score} / {analysis.headingHierarchy.maxScore} pts</span>
+                      </div>
+                      {expandedSections.has('headingHierarchy') && (
+                        <div className="analysis-details">
+                          <p className="criterion-description">Checks that heading levels are not skipped (e.g., h2 follows h1).</p>
+                          {analysis.headingHierarchy.errors.length > 0 ? (
+                            <div className="info-note">
+                              <small>Errors: {analysis.headingHierarchy.errors.join('; ')}</small>
+                            </div>
+                          ) : (
+                            <div className="detail-row"><span className="detail-value status-success">Hierarchy is correct</span></div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 4. Semantic tags used */}
+                  {analysis.semanticTags && (
+                    <div className="analysis-item">
+                      <div className="analysis-header clickable" onClick={() => toggleSection('semanticTags')}>
+                        <div className="analysis-header-left">
+                          <span className="expand-icon">{expandedSections.has('semanticTags') ? '▼' : '▶'}</span>
+                          <h3>4. Semantic Tags</h3>
+                        </div>
+                        <span className="score-badge">{analysis.semanticTags.score} / {analysis.semanticTags.maxScore} pts</span>
+                      </div>
+                      {expandedSections.has('semanticTags') && (
+                        <div className="analysis-details">
+                          <p className="criterion-description">Counts usage of semantic tags like section, article, nav, etc.</p>
+                          <div className="detail-row">
+                            <span className="detail-label">Total Count:</span>
+                            <span className="detail-value">{analysis.semanticTags.count}</span>
+                          </div>
+                          <div className="info-note">
+                            <small>Found: {Object.entries(analysis.semanticTags.foundTags).map(([tag, count]) => `${tag} (${count})`).join(', ')}</small>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 5. Div Soup */}
+                  {analysis.divSoup && (
+                    <div className="analysis-item">
+                      <div className="analysis-header clickable" onClick={() => toggleSection('divSoup')}>
+                        <div className="analysis-header-left">
+                          <span className="expand-icon">{expandedSections.has('divSoup') ? '▼' : '▶'}</span>
+                          <h3>5. "Div Soup" Check</h3>
+                        </div>
+                        <span className="score-badge">{analysis.divSoup.score} / {analysis.divSoup.maxScore} pts</span>
+                      </div>
+                      {expandedSections.has('divSoup') && (
+                        <div className="analysis-details">
+                          <p className="criterion-description">Checks if percentage of divs without class/role is less than 40%.</p>
+                          <div className="detail-row">
+                            <span className="detail-label">Percentage:</span>
+                            <span className={`detail-value ${analysis.divSoup.percentage < 40 ? 'status-success' : 'status-error'}`}>{analysis.divSoup.percentage}%</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Soup Divs / Total:</span>
+                            <span className="detail-value">{analysis.divSoup.soupDivs} / {analysis.divSoup.totalDivs}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 6. Meaningful grouping */}
+                  {analysis.meaningfulGrouping && (
+                    <div className="analysis-item">
+                      <div className="analysis-header clickable" onClick={() => toggleSection('meaningfulGrouping')}>
+                        <div className="analysis-header-left">
+                          <span className="expand-icon">{expandedSections.has('meaningfulGrouping') ? '▼' : '▶'}</span>
+                          <h3>6. Meaningful Grouping</h3>
+                        </div>
+                        <span className="score-badge">{analysis.meaningfulGrouping.score} / {analysis.meaningfulGrouping.maxScore} pts</span>
+                      </div>
+                      {expandedSections.has('meaningfulGrouping') && (
+                        <div className="analysis-details">
+                          <p className="criterion-description">Checks for containers with logical roles or classes.</p>
+                          <div className="detail-row">
+                            <span className="detail-label">Count:</span>
+                            <span className="detail-value">{analysis.meaningfulGrouping.count}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 7. No empty / meaningless headings */}
+                  {analysis.emptyHeadings && (
+                    <div className="analysis-item">
+                      <div className="analysis-header clickable" onClick={() => toggleSection('emptyHeadings')}>
+                        <div className="analysis-header-left">
+                          <span className="expand-icon">{expandedSections.has('emptyHeadings') ? '▼' : '▶'}</span>
+                          <h3>7. Empty Headings</h3>
+                        </div>
+                        <span className="score-badge">{analysis.emptyHeadings.score} / {analysis.emptyHeadings.maxScore} pts</span>
+                      </div>
+                      {expandedSections.has('emptyHeadings') && (
+                        <div className="analysis-details">
+                          <p className="criterion-description">Checks for empty heading tags.</p>
+                          <div className="detail-row">
+                            <span className="detail-label">Empty Count:</span>
+                            <span className={`detail-value ${analysis.emptyHeadings.emptyCount === 0 ? 'status-success' : 'status-error'}`}>{analysis.emptyHeadings.emptyCount}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            </>
           )
         })()}
 
